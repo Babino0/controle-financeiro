@@ -1,32 +1,50 @@
 package org.example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Conta {
     private String usuario;
-    private double saldo;
+    private BigDecimal saldo;
     private List<Transacao> transacoes = new ArrayList<Transacao>();
 
-    public Conta(String usuario, double saldo) {
+    public Conta(String usuario, BigDecimal saldo) {
         this.usuario = usuario;
         this.saldo = saldo;
     }
 
-    public void realizarTransacao(double saldo, String descricao) {
-        double saldoFinal = this.saldo + saldo;
-        if (saldoFinal < 0) {
-            System.out.println("Saldo insuficiente");
-            saldoFinal = 0;
+    private void depositar(BigDecimal valor) {
+        this.saldo = this.saldo.add(valor);
 
-        } else {
-            setSaldo(saldoFinal);
+    }
+
+    private void retirar(BigDecimal valor) {
+        if (saldo.compareTo(valor) < 0) {
+            throw new SaldoInsuficienteException();
+        }
+        saldo = saldo.subtract(valor);
+    }
+
+    public void realizarTransacao(TipoTransacao tipo, BigDecimal valor, String descricao) {
+        if (valor.compareTo(BigDecimal.ZERO) <= 0) {  // valor zero ou negativo
+            throw new IllegalArgumentException("Valor deve ser positivo");
+        }
+        if (tipo == TipoTransacao.RECEITA) {
+            depositar(valor);
+        } else if (tipo == TipoTransacao.DESPESA) {
+            retirar(valor);
+
         }
 
-        Transacao transacao = new Transacao(saldoFinal, descricao);
+        Transacao transacao = new Transacao(tipo, valor, descricao);
         transacoes.add(transacao);
+
     }
-    public  void mostrarTransacoes() {
+
+
+    public void mostrarTransacoes() {
         transacoes.forEach(System.out::println);
     }
 
@@ -34,19 +52,12 @@ public class Conta {
         return usuario;
     }
 
-    public double getSaldo() {
+    public BigDecimal getSaldo() {
         return saldo;
     }
 
     public List<Transacao> getTransacoes() {
-        return transacoes;
+        return Collections.unmodifiableList(transacoes);
     }
 
-    public void setSaldo(double saldo) {
-        this.saldo = saldo;
-    }
-
-    public void setUsuario(String usuario) {
-        this.usuario = usuario;
-    }
 }
