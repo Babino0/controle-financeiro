@@ -27,19 +27,16 @@ public class Conta {
         saldo = saldo.subtract(valor);
     }
 
-    public void realizarTransacao(TipoTransacao tipo, BigDecimal valor, String descricao) {
-        if (valor.compareTo(BigDecimal.ZERO) <= 0) {  // valor zero ou negativo
-            throw new IllegalArgumentException("Valor deve ser positivo");
+    public void realizarTransacao(TipoTransacao tipo, BigDecimal valor, String descricao, Categoria categoria) {
+        if (valor.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException();
         }
-        if (tipo == TipoTransacao.RECEITA) {
-            depositar(valor);
-        } else if (tipo == TipoTransacao.DESPESA) {
-            retirar(valor);
-
+        switch (tipo) {
+            case DESPESA -> retirar(valor);
+            case RECEITA -> depositar(valor);
         }
-
-        Transacao transacao = new Transacao(tipo, valor, descricao);
-        transacoes.add(transacao);
+        Transacao transacao = new Transacao(tipo, valor, descricao, categoria);
+        this.transacoes.add(transacao);
 
     }
 
