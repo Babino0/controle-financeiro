@@ -1,9 +1,7 @@
 package org.example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Conta {
     private String usuario;
@@ -38,6 +36,38 @@ public class Conta {
         Transacao transacao = new Transacao(tipo, valor, descricao, categoria);
         this.transacoes.add(transacao);
 
+    }
+
+    private BigDecimal somar(TipoTransacao tipoTransacao) {
+        BigDecimal soma = BigDecimal.ZERO;
+
+        for (int i = 0; i < this.transacoes.size(); i++) {
+            Transacao transacao = this.transacoes.get(i);
+            if (transacao.getTipo() == tipoTransacao) {
+                soma = soma.add(this.transacoes.get(i).getValor());
+            }
+        }
+        return soma;
+    }
+
+    public BigDecimal totalReceitas() {
+
+        return somar(TipoTransacao.RECEITA);
+    }
+
+    public BigDecimal totalDespesas() {
+        return somar(TipoTransacao.DESPESA);
+    }
+
+    public Map<Categoria, BigDecimal> gastosPorCategoria() {
+
+        Map<Categoria, BigDecimal> mapa = new HashMap<>();
+        for (Transacao t : transacoes) {
+            if (t.getTipo() == TipoTransacao.DESPESA) {
+                mapa.merge(t.getCategoria(), t.getValor(), BigDecimal::add);
+            }
+        }
+        return mapa;
     }
 
 

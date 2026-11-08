@@ -1,10 +1,10 @@
 package org.example;
 
 public class Categoria {
-    String nome;
+    private String nome;
 
-    public void getNome() {
-        this.nome = nome;
+    public String getNome() {
+        return nome;
     }
 
     public Categoria(String nome) {
@@ -13,8 +13,6 @@ public class Categoria {
 
     @Override
     public String toString() {
-        return "Categoria{" +
-                "nome='" + nome + '\'' +
-                '}';
+        return nome;
     }
 }
