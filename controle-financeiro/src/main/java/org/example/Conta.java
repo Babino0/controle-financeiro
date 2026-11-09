@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 public class Conta {
+    private static final Categoria TRANSFERENCIA = new Categoria("Transferência");
     private String usuario;
     private BigDecimal saldo;
     private List<Transacao> transacoes = new ArrayList<Transacao>();
@@ -11,6 +12,7 @@ public class Conta {
     public Conta(String usuario, BigDecimal saldo) {
         this.usuario = usuario;
         this.saldo = saldo;
+
     }
 
     private void depositar(BigDecimal valor) {
@@ -70,6 +72,20 @@ public class Conta {
         return mapa;
     }
 
+    //A retirado do saldo é realizada primeiro para conferir se há saldo o suficiente
+    public void transferir(Conta destino, BigDecimal valor) {
+        Objects.requireNonNull(destino, "Conta destino não pode ser nula");
+        if (destino == this) {
+            throw new IllegalArgumentException("Não dá para transferir para a mesma conta");
+        }
+        if (valor.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Você não tem saldo o suficiente");
+        }
+        this.realizarTransacao(TipoTransacao.DESPESA,valor,"Transferencia para "+ destino.getUsuario(),TRANSFERENCIA);
+        destino.realizarTransacao(TipoTransacao.RECEITA,valor,"Transferencia de "+ this.getUsuario() ,TRANSFERENCIA);
+
+
+    }
 
     public void mostrarTransacoes() {
         transacoes.forEach(System.out::println);
