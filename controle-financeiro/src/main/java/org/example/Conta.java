@@ -5,12 +5,12 @@ import java.util.*;
 
 public class Conta {
     private static final Categoria TRANSFERENCIA = new Categoria("Transferência");
-    private String usuario;
+    private String nome;
     private BigDecimal saldo;
     private List<Transacao> transacoes = new ArrayList<Transacao>();
 
-    public Conta(String usuario, BigDecimal saldo) {
-        this.usuario = usuario;
+    public Conta(String nome, BigDecimal saldo) {
+        this.nome = nome;
         this.saldo = saldo;
 
     }
@@ -79,10 +79,10 @@ public class Conta {
             throw new IllegalArgumentException("Não dá para transferir para a mesma conta");
         }
         if (valor.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Você não tem saldo o suficiente");
+            throw new IllegalArgumentException("Valor deve ser positivo");
         }
-        this.realizarTransacao(TipoTransacao.DESPESA,valor,"Transferencia para "+ destino.getUsuario(),TRANSFERENCIA);
-        destino.realizarTransacao(TipoTransacao.RECEITA,valor,"Transferencia de "+ this.getUsuario() ,TRANSFERENCIA);
+        this.realizarTransacao(TipoTransacao.DESPESA,valor,"Transferencia para "+ destino.getNome(),TRANSFERENCIA);
+        destino.realizarTransacao(TipoTransacao.RECEITA,valor,"Transferencia de "+ this.getNome() ,TRANSFERENCIA);
 
 
     }
@@ -91,8 +91,8 @@ public class Conta {
         transacoes.forEach(System.out::println);
     }
 
-    public String getUsuario() {
-        return usuario;
+    public String getNome() {
+        return nome;
     }
 
     public BigDecimal getSaldo() {
