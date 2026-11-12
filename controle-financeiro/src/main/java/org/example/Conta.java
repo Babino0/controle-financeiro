@@ -81,10 +81,20 @@ public class Conta {
         if (valor.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Valor deve ser positivo");
         }
-        this.realizarTransacao(TipoTransacao.DESPESA,valor,"Transferencia para "+ destino.getNome(),TRANSFERENCIA);
-        destino.realizarTransacao(TipoTransacao.RECEITA,valor,"Transferencia de "+ this.getNome() ,TRANSFERENCIA);
+        this.realizarTransacao(TipoTransacao.DESPESA, valor, "Transferencia para " + destino.getNome(), TRANSFERENCIA);
+        destino.realizarTransacao(TipoTransacao.RECEITA, valor, "Transferencia de " + this.getNome(), TRANSFERENCIA);
 
 
+    }
+
+    public List<Transacao> transacoesDoTipo(TipoTransacao tipo) {
+        List<Transacao> resultado = new ArrayList<>();
+        for (Transacao t : transacoes) {
+            if (t.getTipo() == tipo) {
+                resultado.add(t);
+            }
+        }
+        return Collections.unmodifiableList(resultado);
     }
 
     public void mostrarTransacoes() {
@@ -102,5 +112,6 @@ public class Conta {
     public List<Transacao> getTransacoes() {
         return Collections.unmodifiableList(transacoes);
     }
+
 
 }
