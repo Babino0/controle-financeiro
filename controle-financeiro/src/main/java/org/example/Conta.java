@@ -2,6 +2,7 @@ package org.example;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Conta {
     private static final Categoria TRANSFERENCIA = new Categoria("Transferência");
@@ -28,9 +29,13 @@ public class Conta {
     }
 
     public void realizarTransacao(TipoTransacao tipo, BigDecimal valor, String descricao, Categoria categoria) {
+        Objects.requireNonNull(tipo, "Tipo não pode ser nulo");
+        Objects.requireNonNull(valor, "Valor não pode ser nulo");
+        Objects.requireNonNull(categoria, "Categoria não pode ser nula");
         if (valor.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Valor deve ser positivo");
         }
+
         switch (tipo) {
             case DESPESA -> retirar(valor);
             case RECEITA -> depositar(valor);
@@ -40,39 +45,37 @@ public class Conta {
 
     }
 
-    private BigDecimal somar(TipoTransacao tipoTransacao) {
-        BigDecimal soma = BigDecimal.ZERO;
+    private BigDecimal somarTotal(TipoTransacao tipoTransacao) {
 
-        for (int i = 0; i < this.transacoes.size(); i++) {
-            Transacao transacao = this.transacoes.get(i);
-            if (transacao.getTipo() == tipoTransacao) {
-                soma = soma.add(this.transacoes.get(i).getValor());
-            }
-        }
-        return soma;
+
+        return this.transacoes.stream().
+                filter(t -> t.getTipo() == tipoTransacao)
+                .map(Transacao::getValor)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+
     }
 
     public BigDecimal totalReceitas() {
 
-        return somar(TipoTransacao.RECEITA);
+        return somarTotal(TipoTransacao.RECEITA);
     }
 
     public BigDecimal totalDespesas() {
-        return somar(TipoTransacao.DESPESA);
+
+        return somarTotal(TipoTransacao.DESPESA);
     }
 
     public Map<Categoria, BigDecimal> gastosPorCategoria() {
-
-        Map<Categoria, BigDecimal> mapa = new HashMap<>();
-        for (Transacao t : transacoes) {
-            if (t.getTipo() == TipoTransacao.DESPESA) {
-                mapa.merge(t.getCategoria(), t.getValor(), BigDecimal::add);
-            }
-        }
-        return mapa;
+        return transacoes.stream()
+                .filter(t -> t.getTipo() == TipoTransacao.DESPESA)
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(
+                        Transacao::getCategoria,
+                        Collectors.reducing(BigDecimal.ZERO, Transacao::getValor, BigDecimal::add)));
     }
 
-    //A retirado do saldo é realizada primeiro para conferir se há saldo o suficiente
+    //A retirada do saldo é feita primeiro, para conferir se há saldo suficiente.
     public void transferir(Conta destino, BigDecimal valor) {
         Objects.requireNonNull(destino, "Conta destino não pode ser nula");
         if (destino == this) {
@@ -88,13 +91,9 @@ public class Conta {
     }
 
     public List<Transacao> transacoesDoTipo(TipoTransacao tipo) {
-        List<Transacao> resultado = new ArrayList<>();
-        for (Transacao t : transacoes) {
-            if (t.getTipo() == tipo) {
-                resultado.add(t);
-            }
-        }
-        return Collections.unmodifiableList(resultado);
+        return transacoes.stream()
+                .filter(t -> t.getTipo() == tipo)
+                .toList();
     }
 
     public void mostrarTransacoes() {
